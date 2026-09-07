@@ -1,5 +1,6 @@
 const SOUNDS = {
   shoot: { file: "SoundShootRegular", volume: .18, cooldown: .12 },
+  missile: { file: "SoundMissile", volume: .35, cooldown: .2 },
   enemyShot: { file: "SoundEnemyShot", volume: .13, cooldown: .08 },
   enemyHit: { file: "SoundEnemyHit", volume: .25, cooldown: .06 },
   enemyDeath: { file: "SoundEnemyDeath", volume: .35, cooldown: .06 },

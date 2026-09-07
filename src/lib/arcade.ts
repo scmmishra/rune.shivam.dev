@@ -10,20 +10,26 @@ const MAX_HEARTS = 5;
 const ITEM_DROP_CHANCE = .05;
 const HEAVY_ITEM_DROP_CHANCE = .25;
 const HEART_FALL_SPEED = 55;
+const MISSILE_INTERVAL = 5;
+const MISSILE_SPEED = 260;
+const MISSILE_DAMAGE = 5;
 const HEART = ["0110110", "1111111", "1111111", "0111110", "0011100", "0001000"];
 const UPGRADE = ["0001000", "0011100", "0111110", "1101011", "0001000", "0001000", "0001000"];
+const MISSILE = ["00100", "01110", "01110", "01110", "11111", "10101"];
 const SHIP = ["000010000", "000111000", "000111000", "010111010", "111111111", "111010111", "010010010"];
 const ENEMY = ["000101000", "000111000", "000010000", "000111000", "011111110", "111111111", "000111000", "000010000", "000010000"];
 type Save = { version: 3; stage: number; score: number; best: number; status: "won" };
 type Bullet = { x: number; y: number; vx: number; vy: number; hostile: boolean };
 type Enemy = { id: number; kind: EnemyKind; health: number; x: number; y: number; age: number; fire: number };
 type Pickup = { x: number; y: number; kind: "heart" | "upgrade" };
+type Missile = { x: number; y: number; targetId: number; angle: number };
 type Particle = { x: number; y: number; vx: number; vy: number; life: number };
 
 export function rollDrops(kind: EnemyKind, upgradesAllowed: boolean, random = Math.random): Pickup["kind"][] {
   const chance = kind === "heavy" ? HEAVY_ITEM_DROP_CHANCE : ITEM_DROP_CHANCE;
   if (kind === "boss" || random() >= chance) return [];
-  return Array.from({ length: kind === "heavy" ? 2 : 1 }, () => upgradesAllowed && random() < .5 ? "upgrade" : "heart");
+  const pool: Pickup["kind"][] = upgradesAllowed ? ["upgrade", "heart"] : ["heart"];
+  return Array.from({ length: kind === "heavy" ? 2 : 1 }, () => pool.length === 1 ? pool[0] : pool[Math.floor(random() * pool.length)]);
 }
 
 function readSave(): Save | null {
@@ -67,6 +73,9 @@ export function mountArcade(root: HTMLElement) {
   let best = saved?.best ?? 0;
   let hearts = MAX_HEARTS;
   let weapon = 1;
+  let hasMissiles = false;
+  let missileCooldown = MISSILE_INTERVAL;
+  let missiles: Missile[] = [];
   const defeated = new Set<number>();
   let mode: "ready" | "playing" | "paused" | "won" | "lost" = "ready";
   let enemies: Enemy[] = [];
@@ -82,6 +91,7 @@ export function mountArcade(root: HTMLElement) {
   let finishDelay = 0;
   let fireCooldown = 0;
   let invulnerable = 0;
+  let invincible = false;
   let pointer: { x: number; y: number } | null = null;
   const stars = Array.from({ length: 65 }, () => ({ x: Math.random() * WIDTH, y: Math.random() * HEIGHT, depth: .3 + Math.random() * .7 }));
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -93,7 +103,7 @@ export function mountArcade(root: HTMLElement) {
     record.textContent = best ? `PERSONAL BEST / ${String(best).padStart(5, "0")}` : `SECTOR ${sectorIndex + 1} / ${SECTORS[sectorIndex].waves.length} WAVES`;
     waveLabel.textContent = `WAVE ${Math.max(1, nextWave)}/${SECTORS[sectorIndex].waves.length}`;
     sectorLabel.textContent = String(sectorIndex + 1).padStart(2, "0");
-    weaponLabel.textContent = `FIRE ×${weapon}`;
+    weaponLabel.textContent = `FIRE ×${weapon}${hasMissiles ? " · HOMING / 5s" : ""}`;
     const boss = enemies.find(e => e.kind === "boss" && e.health > 0);
     bossLabel.hidden = !boss || mode !== "playing";
     bossLabel.textContent = boss ? `COMMAND SHIP / ${boss.health} / ${ENEMY_TYPES.boss.health}` : "";
@@ -110,6 +120,9 @@ export function mountArcade(root: HTMLElement) {
     bullets = [];
     particles = [];
     pickups = [];
+    missiles = [];
+    hasMissiles = false;
+    missileCooldown = MISSILE_INTERVAL;
     player = { x: WIDTH / 2, y: HEIGHT - 65 };
     invulnerable = 1.5;
     fireCooldown = 0;
@@ -184,6 +197,7 @@ export function mountArcade(root: HTMLElement) {
     }
   }
   function damage() {
+    if (import.meta.env.DEV && invincible) return;
     if (invulnerable > 0) return;
     hearts--;
     audio.play("playerHit");
@@ -195,6 +209,24 @@ export function mountArcade(root: HTMLElement) {
   function dropItems(enemy: Enemy) {
     const items = rollDrops(enemy.kind, SECTORS[sectorIndex].maxFire > 1);
     items.forEach((kind, i) => pickups.push({ x: enemy.x + (i - (items.length - 1) / 2) * 24, y: enemy.y, kind }));
+  }
+  function hitEnemy(enemy: Enemy, damage: number) {
+    if (defeated.has(enemy.id)) return;
+    enemy.health = Math.max(0, enemy.health - damage);
+    if (enemy.health > 0) audio.play("enemyHit");
+    else {
+      audio.play(enemy.kind === "basic" ? "enemyDeath" : "explosion");
+      defeated.add(enemy.id);
+      score += ENEMY_TYPES[enemy.kind].points;
+      burst(enemy.x, enemy.y);
+      dropItems(enemy);
+      status.textContent = `Wave ${nextWave}/${SECTORS[sectorIndex].waves.length} · ${defeated.size} aircraft down`;
+    }
+    hud();
+  }
+  function randomTarget() {
+    const targets = enemies.filter(e => !defeated.has(e.id) && e.y >= 0 && e.y <= HEIGHT);
+    return targets[Math.floor(Math.random() * targets.length)];
   }
   function update(dt: number) {
     clock += dt;
@@ -256,21 +288,40 @@ export function mountArcade(root: HTMLElement) {
         const hit = enemies.find(e => e.y > -10 && !defeated.has(e.id) && Math.abs(e.x - bullet.x) < ENEMY_TYPES[e.kind].scale * 4.5 + 2 && Math.abs(e.y - bullet.y) < ENEMY_TYPES[e.kind].scale * 4.5 + 2);
         if (hit) {
           bullet.y = -40;
-          hit.health--;
-          if (hit.health > 0) audio.play("enemyHit");
-          if (hit.health === 0) {
-            audio.play(hit.kind === "basic" ? "enemyDeath" : "explosion");
-            defeated.add(hit.id);
-            score += ENEMY_TYPES[hit.kind].points;
-            burst(hit.x, hit.y);
-            dropItems(hit);
-            status.textContent = `Wave ${nextWave}/${sector.waves.length} · ${defeated.size} aircraft down`;
-          }
-          hud();
+          hitEnemy(hit, 1);
         }
       }
       if (mode !== "playing") return;
     }
+    if (hasMissiles) {
+      missileCooldown = Math.max(0, missileCooldown - dt);
+      if (missileCooldown === 0) {
+        const target = randomTarget();
+        if (target) {
+          missiles.push({ x: player.x, y: player.y - 14, targetId: target.id, angle: -Math.PI / 2 });
+          missileCooldown = MISSILE_INTERVAL;
+          audio.play("missile");
+        }
+      }
+    }
+    missiles = missiles.filter(missile => {
+      let target = enemies.find(e => e.id === missile.targetId && !defeated.has(e.id) && e.y >= 0 && e.y <= HEIGHT);
+      if (!target) target = randomTarget();
+      if (!target) return false;
+      missile.targetId = target.id;
+      const dx = target.x - missile.x;
+      const dy = target.y - missile.y;
+      const distance = Math.hypot(dx, dy);
+      const travel = MISSILE_SPEED * dt;
+      missile.angle = Math.atan2(dy, dx);
+      if (distance <= travel + ENEMY_TYPES[target.kind].scale * 4.5) {
+        hitEnemy(target, MISSILE_DAMAGE);
+        return false;
+      }
+      missile.x += dx / distance * travel;
+      missile.y += dy / distance * travel;
+      return true;
+    });
     enemies = enemies.filter(e => {
       if (defeated.has(e.id)) return false;
       if (e.y > HEIGHT + ENEMY_TYPES[e.kind].scale * 5) { escaped++; return false; }
@@ -280,10 +331,14 @@ export function mountArcade(root: HTMLElement) {
     pickups = pickups.filter(item => {
       item.y += HEART_FALL_SPEED * dt;
       if (Math.abs(item.x - player.x) < 20 && Math.abs(item.y - player.y) < 22) {
-        audio.play(item.kind);
+        audio.play(item.kind === "heart" ? "heart" : "upgrade");
         if (item.kind === "heart") {
           hearts = Math.min(MAX_HEARTS, hearts + 1);
           status.textContent = `Heart collected · ${hearts} hearts remaining`;
+        } else if (sectorIndex >= 2 && weapon === 3 && !hasMissiles) {
+          hasMissiles = true;
+          missileCooldown = MISSILE_INTERVAL;
+          status.textContent = "Homing missiles online · one launch every 5 seconds";
         } else {
           weapon = Math.min(sector.maxFire, weapon + 1);
           status.textContent = `Weapon upgrade · fire ×${weapon}`;
@@ -324,7 +379,17 @@ export function mountArcade(root: HTMLElement) {
       }
     }
     ctx.fillStyle = "#b8ffcb";
-    for (const item of pickups) sprite(item.kind === "heart" ? HEART : UPGRADE, item.x, item.y, 2);
+    for (const item of pickups) {
+      sprite(item.kind === "heart" ? HEART : UPGRADE, item.x, item.y, 2);
+    }
+    for (const missile of missiles) {
+      ctx.save();
+      ctx.translate(missile.x, missile.y);
+      ctx.rotate(missile.angle + Math.PI / 2);
+      sprite(MISSILE, 0, 0, 2);
+      ctx.fillRect(-1, 7, 2, 8);
+      ctx.restore();
+    }
     if (invulnerable <= 0 || Math.floor(clock * 10) % 2 === 0 || reducedMotion.matches) sprite(SHIP, player.x, player.y);
     ctx.fillStyle = "#4de07a";
     ctx.fillRect(player.x - 2, player.y + 12, 4, 6 + Math.sin(clock * 24) * 3);
@@ -341,7 +406,7 @@ export function mountArcade(root: HTMLElement) {
   hud();
   if (saved) {
     title.textContent = saved.stage === SECTORS.length ? "patrol_complete" : `patrol_0${sectorIndex + 1}`;
-    message.textContent = saved.stage === SECTORS.length ? `All sectors complete. Score: ${score}.` : `Sector ${saved.stage} cleared. ${SECTORS[sectorIndex].waves.length} waves ahead. Collect ↑ pickups to upgrade your fire.`;
+    message.textContent = saved.stage === SECTORS.length ? `All sectors complete. Score: ${score}.` : `Sector ${saved.stage} cleared. ${SECTORS[sectorIndex].waves.length} waves ahead. ${sectorIndex >= 2 ? "Collect ↑: double fire, triple fire, then homing missiles." : "Collect ↑ pickups to upgrade your fire."}`;
     start.textContent = saved.stage === SECTORS.length ? "[ fly again ]" : `[ enter sector ${sectorIndex + 1} ]`;
     status.textContent = saved.stage === SECTORS.length ? "All sectors complete" : `Sector ${sectorIndex + 1} ready`;
   }
@@ -379,6 +444,50 @@ export function mountArcade(root: HTMLElement) {
   });
   for (const event of ["pointerleave", "pointercancel"]) canvas.addEventListener(event, () => { pointer = null; });
   function suspend() { audio.stop(); pause(); }
+  if (import.meta.env.DEV) {
+    const panel = root.querySelector<HTMLElement>("[data-dev-controls]")!;
+    const devInvincible = panel.querySelector<HTMLInputElement>("[data-dev-invincible]")!;
+    const devSector = panel.querySelector<HTMLSelectElement>("[data-dev-sector]")!;
+    const devWave = panel.querySelector<HTMLSelectElement>("[data-dev-wave]")!;
+    const devFire = panel.querySelector<HTMLSelectElement>("[data-dev-fire]")!;
+    const devMissiles = panel.querySelector<HTMLInputElement>("[data-dev-missiles]")!;
+    function fillWaves() {
+      const selectedSector = SECTORS[Number(devSector.value)];
+      devWave.replaceChildren(...selectedSector.waves.map((wave, i) => new Option(`${i + 1} · ${wave.name.toLowerCase()}`, String(i))));
+    }
+    devSector.value = String(sectorIndex);
+    fillWaves();
+    panel.addEventListener("toggle", () => {
+      devSector.value = String(sectorIndex);
+      fillWaves();
+      devWave.value = String(Math.max(0, nextWave - 1));
+      devFire.value = String(weapon);
+      devMissiles.checked = hasMissiles;
+    }, true);
+    devSector.addEventListener("change", fillWaves);
+    devInvincible.addEventListener("change", () => { invincible = devInvincible.checked; });
+    devFire.addEventListener("change", () => { weapon = Number(devFire.value); hud(); });
+    devMissiles.addEventListener("change", () => {
+      hasMissiles = devMissiles.checked;
+      missileCooldown = MISSILE_INTERVAL;
+      if (!hasMissiles) missiles = [];
+      hud();
+    });
+    panel.querySelector<HTMLButtonElement>("[data-dev-jump]")!.addEventListener("click", () => {
+      sectorIndex = Number(devSector.value);
+      const waveIndex = Number(devWave.value);
+      entryScore = 0;
+      mode = "ready";
+      play();
+      nextWave = waveIndex;
+      nextEnemyId = SECTORS[sectorIndex].waves.slice(0, waveIndex).reduce((total, wave) => total + wave.formation.length, 0);
+      escaped = nextEnemyId;
+      clock = SECTORS[sectorIndex].waves[waveIndex].at;
+      weapon = Number(devFire.value);
+      hasMissiles = devMissiles.checked;
+      hud();
+    });
+  }
   document.addEventListener("visibilitychange", () => { if (document.hidden) suspend(); });
   window.addEventListener("blur", suspend);
   window.addEventListener("pagehide", suspend);

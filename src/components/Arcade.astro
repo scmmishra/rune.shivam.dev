@@ -24,6 +24,19 @@
     </div>
   </div>
   <p class="arcade-status" role="status" aria-live="polite" data-status>Level 1 · three waves</p>
+  {import.meta.env.DEV && (
+    <details class="arcade-dev" data-dev-controls>
+      <summary>dev controls</summary>
+      <div class="arcade-dev-options">
+        <label><input type="checkbox" data-dev-invincible /> invincibility</label>
+        <label>sector <select data-dev-sector><option value="0">1</option><option value="1">2</option><option value="2">3</option></select></label>
+        <label>wave <select data-dev-wave><option value="0">1</option><option value="1">2</option><option value="2">3</option></select></label>
+        <button type="button" data-dev-jump>[ jump ]</button>
+        <label>fire <select data-dev-fire><option value="1">single</option><option value="2">double</option><option value="3">triple</option></select></label>
+        <label><input type="checkbox" data-dev-missiles /> homing missiles</label>
+      </div>
+    </details>
+  )}
   <noscript>Enable JavaScript to play Rune patrol.</noscript>
 </section>
 
@@ -56,6 +69,12 @@
   .arcade-footer { border-top: 1px solid rgb(77 224 122 / .16); padding-top: .875rem; font-size: .5625rem; line-height: 1.8; letter-spacing: 0; }
   .arcade-actions { display: flex; gap: .75rem; flex-shrink: 0; }
   .arcade-status { margin-top: .5rem; font-size: .5625rem; color: var(--color-crt-dim); }
+  .arcade-dev { border-top: 1px dashed var(--color-crt-dim); margin-top: .75rem; padding-top: .5rem; font-size: .625rem; }
+  .arcade-dev summary { cursor: pointer; }
+  .arcade-dev-options { display: flex; flex-wrap: wrap; gap: .75rem; padding-block: .75rem; align-items: center; }
+  .arcade-dev label { display: flex; align-items: center; gap: .375rem; }
+  .arcade-dev input { accent-color: var(--color-crt); }
+  .arcade-dev select { color: var(--color-crt-bright); background: var(--color-crt-bg); border: 1px solid var(--color-crt-dim); padding: .2rem; }
   @media (max-width: 79.999rem) { .arcade-field { height: min(70vh, 36rem); } }
   @media (min-width: 40rem) and (max-width: 79.999rem) { .arcade { margin-inline: 2.5rem; max-width: 40rem; } }
   @media (min-width: 80rem) {
