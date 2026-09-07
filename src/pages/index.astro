@@ -1,0 +1,73 @@
+---
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content="Rune is your terminal, with the context you need." />
+		<title>Rune · Your terminal, with the context you need</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+		<link rel="stylesheet" href="../styles/global.css" />
+	</head>
+	<body class="min-h-screen overflow-x-hidden bg-[#07100a] font-sans text-[#e8f5e8] selection:bg-[#78f58d] selection:text-[#07100a]">
+		<div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(59,215,100,0.15),transparent_28rem),linear-gradient(rgba(151,255,174,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(151,255,174,0.025)_1px,transparent_1px)] bg-[size:auto,36px_36px,36px_36px]"></div>
+		<header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 lg:px-8">
+			<a href="#top" class="flex items-center gap-3" aria-label="Rune home">
+				<span class="grid size-9 place-items-center rounded-xl border border-[#8aff9b]/25 bg-[#101b13] shadow-[0_0_18px_rgba(92,255,119,0.16)]">
+					<svg viewBox="0 0 48 48" class="size-6" aria-hidden="true"><path fill="currentColor" class="text-[#81ff98]" d="M7 5h23v5h5v5h5v10h-5v5h-9v5h5v5h5v5H30v-5h-5v-5h-5v10H7V5Zm13 10v10h9v-5h5v-5h-5v-5h-9v5Z" /></svg>
+				</span>
+				<span class="font-mono text-sm font-medium tracking-[0.18em] text-[#d8f8dc]">RUNE</span>
+			</a>
+			<nav class="hidden items-center gap-8 text-sm text-[#aabbaa] sm:flex">
+				<a class="transition hover:text-[#8aff9b]" href="#features">Features</a>
+				<a class="transition hover:text-[#8aff9b]" href="#brief">Change Brief</a>
+			</nav>
+			<a class="rounded-lg border border-[#80f797]/35 bg-[#8aff9b]/10 px-4 py-2 text-sm font-medium text-[#b9ffc5] transition hover:bg-[#8aff9b] hover:text-[#07100a]" href="https://github.com/scmmishra/rune">View on GitHub <span aria-hidden="true">↗</span></a>
+		</header>
+
+		<main id="top">
+			<section class="mx-auto max-w-6xl px-6 pb-20 pt-14 text-center lg:px-8 lg:pb-28 lg:pt-24">
+				<div class="mx-auto mb-8 grid size-24 place-items-center rounded-[1.7rem] border border-[#b5ffc0]/25 bg-[linear-gradient(145deg,#35453d,#101b15)] shadow-[0_0_0_8px_rgba(110,255,136,.04),0_24px_60px_rgba(0,0,0,.38)]">
+					<div class="grid size-[4.5rem] place-items-center rounded-[1.25rem] border border-[#a9ffc0]/10 bg-[#08120b] shadow-inner shadow-[#64ff82]/20">
+						<svg viewBox="0 0 48 48" class="size-11 drop-shadow-[0_0_8px_rgba(102,255,130,.75)]" aria-hidden="true"><path fill="#7dff97" d="M7 5h23v5h5v5h5v10h-5v5h-9v5h5v5h5v5H30v-5h-5v-5h-5v10H7V5Zm13 10v10h9v-5h5v-5h-5v-5h-9v5Z" /></svg>
+					</div>
+				</div>
+				<p class="mb-5 font-mono text-xs tracking-[0.22em] text-[#7df58f]">BUILT FOR THE FLOW STATE</p>
+				<h1 class="mx-auto max-w-4xl text-balance text-5xl font-semibold tracking-[-0.055em] text-[#efffef] sm:text-6xl lg:text-7xl">Your terminal,<br /><span class="text-[#82f799]">with the context you need.</span></h1>
+				<p class="mx-auto mt-7 max-w-xl text-pretty text-lg leading-8 text-[#afc4b1]">A small, native macOS workspace for terminal-first development. Keep your shell, files, diffs, and Git history close at hand.</p>
+				<div class="mt-9 flex flex-wrap justify-center gap-3">
+					<a class="rounded-lg bg-[#85fa9a] px-5 py-3 text-sm font-semibold text-[#07100a] shadow-[0_0_24px_rgba(99,255,128,.25)] transition hover:-translate-y-0.5 hover:bg-[#b1ffbd]" href="https://github.com/scmmishra/rune">Get Rune <span aria-hidden="true">↗</span></a>
+					<a class="rounded-lg border border-white/12 bg-white/[0.035] px-5 py-3 text-sm font-medium text-[#d9eadb] transition hover:border-[#89ff9e]/35 hover:bg-[#89ff9e]/10" href="#features">Explore the workspace</a>
+				</div>
+			</section>
+
+			<section class="mx-auto max-w-6xl px-6 lg:px-8" aria-label="Rune workspace preview">
+				<div class="overflow-hidden rounded-2xl border border-[#b7ffbf]/15 bg-[#0b1510] p-2 shadow-[0_32px_100px_rgba(0,0,0,.46),0_0_70px_rgba(66,233,95,.09)]">
+					<div class="overflow-hidden rounded-xl border border-white/[0.06] bg-[#101b14]">
+						<div class="flex h-11 items-center gap-2 border-b border-white/[0.06] bg-[#17231a] px-4"><span class="size-2.5 rounded-full bg-[#ff766d]"></span><span class="size-2.5 rounded-full bg-[#f6c65d]"></span><span class="size-2.5 rounded-full bg-[#74e580]"></span><span class="ml-4 font-mono text-[0.65rem] text-[#809383]">rune · ~/projects/atlas</span></div>
+						<div class="grid min-h-[25rem] grid-cols-[10.5rem_1fr] sm:grid-cols-[13rem_1fr_12rem]">
+							<div class="border-e border-white/[0.06] bg-[#0c160f] p-4 font-mono text-[0.65rem] leading-7 text-[#78907a]"><p class="mb-2 text-[#b2cbb5]">EXPLORER</p><p>⌄ atlas</p><p class="ps-3">⌄ src</p><p class="ps-6 text-[#8cff9d]">▸ app.ts</p><p class="ps-6">▸ routes.ts</p><p class="ps-3">⌄ tests</p><p class="ps-6">▸ app.test.ts</p><p class="mt-5 text-[#b2cbb5]">CHANGES</p><p class="text-[#8cff9d]">M app.ts</p><p class="text-[#f2b879]">M routes.ts</p></div>
+							<div class="relative overflow-hidden p-5 sm:p-7"><div class="absolute inset-0 opacity-[0.035] [background:repeating-linear-gradient(0deg,transparent,transparent_3px,#b9ffbe_4px)]"></div><div class="relative font-mono text-xs leading-7 sm:text-sm"><p><span class="text-[#8cff9d]">shivam@rune</span><span class="text-[#b9caba]">:~/atlas</span> <span class="text-[#77e6ff]">git status</span></p><p class="mt-3 text-[#b8c8b9]">On branch <span class="text-[#f2c77d]">feature/brief</span></p><p class="text-[#b8c8b9]">Changes not staged for commit:</p><p class="ps-4 text-[#dce7dd]">modified: <span class="text-[#ff9a8f]">src/app.ts</span></p><p class="ps-4 text-[#dce7dd]">modified: <span class="text-[#ff9a8f]">src/routes.ts</span></p><p class="mt-5"><span class="text-[#8cff9d]">shivam@rune</span><span class="text-[#b9caba]">:~/atlas</span> <span class="animate-pulse text-[#8cff9d]">█</span></p></div></div>
+							<div class="hidden border-s border-white/[0.06] bg-[#0c160f] p-4 sm:block"><p class="font-mono text-[0.65rem] text-[#b2cbb5]">GIT HISTORY</p><div class="mt-5 space-y-4 border-s border-[#4e6c52] ps-4 text-xs"><p><span class="block text-[#d4e4d5]">Add Change Brief</span><span class="text-[#78907a]">2 minutes ago</span></p><p><span class="block text-[#d4e4d5]">Refine terminal focus</span><span class="text-[#78907a]">Yesterday</span></p><p><span class="block text-[#d4e4d5]">Initial workspace</span><span class="text-[#78907a]">Jun 12</span></p></div></div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section id="features" class="mx-auto max-w-6xl px-6 py-28 lg:px-8">
+				<div class="mb-12 max-w-xl"><p class="font-mono text-xs tracking-[0.2em] text-[#7df58f]">CLOSE AT HAND</p><h2 class="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#efffef] sm:text-4xl">Everything around the terminal.</h2></div>
+				<div class="grid gap-4 md:grid-cols-3">
+					<article class="rounded-xl border border-white/[0.09] bg-white/[0.025] p-6"><span class="font-mono text-[#84f99b]">01</span><h3 class="mt-8 text-lg font-semibold">Stay in your flow</h3><p class="mt-3 leading-7 text-[#9fb4a1]">A Ghostty-powered terminal sits alongside the project context you reach for most.</p></article>
+					<article class="rounded-xl border border-white/[0.09] bg-white/[0.025] p-6"><span class="font-mono text-[#84f99b]">02</span><h3 class="mt-8 text-lg font-semibold">See what changed</h3><p class="mt-3 leading-7 text-[#9fb4a1]">Browse diffs and Git history without stepping out of your workspace.</p></article>
+					<article class="rounded-xl border border-white/[0.09] bg-white/[0.025] p-6"><span class="font-mono text-[#84f99b]">03</span><h3 class="mt-8 text-lg font-semibold">Keep moving</h3><p class="mt-3 leading-7 text-[#9fb4a1]">Searchable palettes keep files, commands, branches, and projects at your fingertips.</p></article>
+				</div>
+			</section>
+
+			<section id="brief" class="border-y border-[#b7ffbf]/10 bg-[#0b1710] px-6 py-24 lg:px-8"><div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1fr_.9fr] lg:items-center"><div><p class="font-mono text-xs tracking-[0.2em] text-[#7df58f]">CHANGE BRIEF</p><h2 class="mt-4 max-w-lg text-4xl font-semibold tracking-[-0.05em] text-[#efffef]">Understand the change before you read the diff.</h2><p class="mt-6 max-w-xl leading-7 text-[#a9bdab]">Get clear explanations, diagrams, and links to the code for your working tree, staged changes, or pull request.</p><a class="mt-8 inline-flex rounded-lg border border-[#8aff9b]/35 px-5 py-3 text-sm font-medium text-[#b9ffc5] transition hover:bg-[#8aff9b] hover:text-[#07100a]" href="https://github.com/scmmishra/rune">Learn about Change Brief <span class="ms-2">↗</span></a></div><div class="rounded-xl border border-[#a7ffb8]/15 bg-[#07100a] p-6 font-mono text-xs shadow-[inset_0_0_32px_rgba(88,255,121,.05)]"><p class="text-[#80f494]">✦ CHANGE BRIEF</p><p class="mt-5 text-[#d4e4d5]">Authentication flow simplified</p><div class="mt-5 space-y-3 border-s border-[#446c4c] ps-4 text-[#92aa95]"><p><span class="text-[#d4e4d5]">Why</span> The callback handler now owns state validation.</p><p><span class="text-[#d4e4d5]">Impact</span> Fewer duplicate checks across routes.</p><p><span class="text-[#d4e4d5]">Files</span> auth/callback.ts · session.ts</p></div></div></div></section>
+		</main>
+		<footer class="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-10 text-sm text-[#718373] sm:flex-row sm:items-center sm:justify-between lg:px-8"><div class="flex items-center gap-2 font-mono text-xs"><span class="text-[#85fa9a]">◆</span> RUNE</div><p>Small, focused, and native.</p><a class="hover:text-[#9dffaa]" href="https://github.com/scmmishra/rune">GitHub ↗</a></footer>
+	</body>
+</html>
