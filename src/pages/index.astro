@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Arcade from "../components/Arcade.astro";
 import { logoSvg, logoDataUri } from "../lib/logo";
 
 const features = [
@@ -23,10 +24,10 @@ const repo = "https://github.com/scmmishra/rune";
 		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 	</head>
 
-	<body class="tube min-h-screen bg-crt-bg font-mono text-crt antialiased selection:bg-crt selection:text-crt-bg">
+	<body class="tube mx-auto min-h-screen max-w-[100rem] bg-crt-bg font-mono text-crt antialiased selection:bg-crt selection:text-crt-bg">
 		<div class="retrace" aria-hidden="true"></div>
 
-		<div class="power-on max-w-3xl px-5 py-8 text-[0.8125rem] leading-6 sm:px-10 sm:py-12 sm:leading-7">
+		<div class="power-on px-5 py-8 text-[0.8125rem] leading-6 sm:px-10 sm:py-12 sm:leading-7 xl:w-1/2">
 			<header class="boot flex flex-wrap items-center gap-x-8 gap-y-3">
 				<a class="flex items-center gap-2.5" href="/" aria-label="Rune home">
 					<span class="block size-6 [&>svg]:size-full" aria-hidden="true" set:html={logoSvg} />
@@ -99,5 +100,6 @@ const repo = "https://github.com/scmmishra/rune";
 
 			</main>
 		</div>
+		<Arcade />
 	</body>
 </html>

@@ -1,0 +1,56 @@
+<section class="arcade" aria-label="Rune patrol arcade game">
+  <div class="arcade-hud glow">
+    <span>SECTOR <span class="bright">01</span></span>
+    <span>SCORE <span class="bright" data-score>00000</span></span>
+    <span data-hearts aria-label="5 hearts remaining">♥ ♥ ♥ ♥ ♥</span>
+  </div>
+  <div class="arcade-field">
+    <canvas width="400" height="520" tabindex="0" aria-label="Rune patrol. Move the cursor to fly. Firing is automatic. Escape pauses." aria-describedby="arcade-controls"></canvas>
+    <div class="arcade-menu">
+      <p class="arcade-kicker">RUNE / FLIGHT SIMULATOR</p>
+      <h2 class="glow-hi" data-title>patrol_01</h2>
+      <p class="arcade-message" data-message>One ship. One sector. Clear the sky.</p>
+      <button type="button" data-start disabled>[ launch ]</button>
+      <p class="arcade-record" data-record></p>
+    </div>
+  </div>
+  <div class="arcade-footer" id="arcade-controls">
+    <span>move cursor to fly · auto-fire · ESC pause</span>
+    <button type="button" data-pause hidden>pause [Ⅱ]</button>
+  </div>
+  <p class="arcade-status" role="status" aria-live="polite" data-status>Level 1 · one wave</p>
+  <noscript>Enable JavaScript to play Rune patrol.</noscript>
+</section>
+
+<script>
+  import { mountArcade } from "../lib/arcade";
+  const arcade = document.querySelector<HTMLElement>(".arcade");
+  if (arcade) mountArcade(arcade);
+</script>
+
+<style>
+  .arcade { margin: 1rem 1.25rem 3rem; color: var(--color-crt); font-size: .6875rem; letter-spacing: .06em; }
+  .arcade-hud, .arcade-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .arcade-hud { padding-block: 1rem; border-bottom: 1px solid rgb(77 224 122 / .16); }
+  .bright { color: var(--color-crt-bright); }
+  .arcade-field { position: relative; min-height: 0; flex: 1; display: flex; justify-content: center; }
+  canvas { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; touch-action: none; }
+  canvas:focus-visible { outline: 1px dashed var(--color-crt-dim); outline-offset: .25rem; }
+  .arcade-menu { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
+  .arcade-menu[hidden], button[hidden] { display: none; }
+  .arcade-kicker { font-size: .625rem; letter-spacing: .2em; }
+  h2 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.4; letter-spacing: -.06em; color: var(--color-crt-bright); margin-block: .5rem; }
+  .arcade-message { max-width: 20rem; line-height: 1.8; letter-spacing: 0; }
+  button { cursor: pointer; color: var(--color-crt-bright); }
+  [data-start] { margin-top: 1.75rem; padding: .6rem 1rem; border: 1px solid var(--color-crt-dim); }
+  button:hover { color: var(--color-crt-bg); background: var(--color-crt); }
+  button:disabled { opacity: .4; cursor: wait; }
+  .arcade-record { margin-top: 1.5rem; font-size: .625rem; }
+  .arcade-footer { border-top: 1px solid rgb(77 224 122 / .16); padding-top: .875rem; font-size: .5625rem; line-height: 1.8; letter-spacing: 0; }
+  .arcade-status { margin-top: .5rem; font-size: .5625rem; color: var(--color-crt-dim); }
+  @media (max-width: 79.999rem) { .arcade-field { height: min(70vh, 36rem); } }
+  @media (min-width: 40rem) and (max-width: 79.999rem) { .arcade { margin-inline: 2.5rem; max-width: 40rem; } }
+  @media (min-width: 80rem) {
+    .arcade { position: fixed; inset-block: 2rem; left: calc(50% + 1.5rem); width: calc(min(50%, 50rem) - 4rem); margin: 0; display: flex; flex-direction: column; }
+  }
+</style>
