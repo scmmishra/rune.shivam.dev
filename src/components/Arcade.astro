@@ -5,7 +5,7 @@
     <span data-hearts aria-label="5 hearts remaining">♥ ♥ ♥ ♥ ♥</span>
   </div>
   <div class="arcade-field">
-    <canvas width="400" height="520" tabindex="0" aria-label="Rune patrol. Move the cursor to fly. Firing is automatic. Escape pauses. S toggles sound." aria-describedby="arcade-controls"></canvas>
+    <canvas width="500" height="520" tabindex="0" aria-label="Rune patrol. Move the cursor to fly. Firing is automatic. Double-click to call collected reinforcements. Escape pauses. S toggles sound." aria-describedby="arcade-controls"></canvas>
     <p class="arcade-wave glow" data-wave-banner hidden></p>
     <p class="arcade-boss" data-boss hidden></p>
     <div class="arcade-menu">
@@ -17,7 +17,7 @@
     </div>
   </div>
   <div class="arcade-footer" id="arcade-controls">
-    <span>move cursor to fly · auto-fire · ESC pause<br /><span data-weapon>FIRE ×1</span></span>
+    <span>move cursor to fly · auto-fire · ESC pause<br />double-click: reinforcements<br /><span data-weapon>FIRE ×1</span></span>
     <div class="arcade-actions">
       <button type="button" data-sound aria-label="Mute game sounds" aria-pressed="false" aria-keyshortcuts="S">sound [on] · S</button>
       <button type="button" data-pause hidden>pause [Ⅱ]</button>
@@ -29,11 +29,11 @@
       <summary>dev controls</summary>
       <div class="arcade-dev-options">
         <label><input type="checkbox" data-dev-invincible /> invincibility</label>
-        <label>sector <select data-dev-sector><option value="0">1</option><option value="1">2</option><option value="2">3</option></select></label>
+        <label>sector <select data-dev-sector><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select></label>
         <label>wave <select data-dev-wave><option value="0">1</option><option value="1">2</option><option value="2">3</option></select></label>
         <button type="button" data-dev-jump>[ jump ]</button>
-        <label>fire <select data-dev-fire><option value="1">single</option><option value="2">double</option><option value="3">triple</option></select></label>
-        <label><input type="checkbox" data-dev-missiles /> homing missiles</label>
+        <label>weapons <select data-dev-fire><option value="0">single</option><option value="1">double</option><option value="2">triple</option><option value="3">angled guns</option><option value="4">+ homing missile</option><option value="5">+ twin missiles</option></select></label>
+        <label><input type="checkbox" data-dev-reinforcements /> reinforcements</label>
       </div>
     </details>
   )}
