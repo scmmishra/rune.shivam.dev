@@ -4,16 +4,16 @@
   --font-display: "Doto", "IBM Plex Mono", ui-monospace, monospace;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* P1 phosphor: one hue at three intensities, on a tube that is never pure black. */
-  --color-crt-bg: #060b07;
-  --color-crt-panel: #0a120c;
-  --color-crt-raised: #0f1a12;
-  --color-crt-bright: #b8ffcb;
-  --color-crt: #4de07a;
-  --color-crt-dim: #2c7a46;
+  /* A neutral dark surface. Phosphor green survives as the accent, softened. */
+  --color-crt-bg: #0a0a0a;
+  --color-crt-panel: #0f0f0f;
+  --color-crt-raised: #181918;
+  --color-crt-bright: #e6efe8;
+  --color-crt: #7ed39a;
+  --color-crt-dim: #5d6b62;
   /* Prose sits off the phosphor so long text stays readable. */
-  --color-crt-prose: #93b59c;
-  --color-crt-line: rgb(77 224 122 / 0.14);
+  --color-crt-prose: #a6aba8;
+  --color-crt-line: rgb(255 255 255 / 0.08);
   /* Rune's own signal for a terminal that is waiting for you. */
   --color-amber: #ffb454;
 }
@@ -23,37 +23,6 @@ html {
   scroll-padding-top: 5rem;
   background: var(--color-crt-bg);
 }
-
-body {
-  background:
-    radial-gradient(90rem 50rem at 50% -10rem, rgb(77 224 122 / 0.07), transparent 70%),
-    var(--color-crt-bg);
-}
-
-/* ---- The tube ---------------------------------------------------------
-   Two fixed overlays, both pointer-transparent. They are a texture, not
-   an effect: faint enough that text reads as it would on a clean page. */
-
-.tube::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
-  box-shadow: inset 0 0 min(12rem, 30vmin) rgb(0 0 0 / 0.55);
-}
-
-.tube::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 41;
-  pointer-events: none;
-  background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 3px);
-}
-
-/* Phosphor bloom, kept for display type and live signals only. */
-.glow { text-shadow: 0 0 1.25rem rgb(77 224 122 / 0.45); }
 
 /* ---- Surfaces ----------------------------------------------------------
    Rune's interface is cards in columns. The site uses the same unit. */
@@ -70,8 +39,8 @@ body {
   }
 
   .dot { @apply inline-block size-[0.4375rem] shrink-0 rounded-full bg-crt-dim; }
-  .dot-run { @apply bg-crt shadow-[0_0_0.5rem_var(--color-crt)]; }
-  .dot-wait { @apply bg-amber shadow-[0_0_0.5rem_var(--color-amber)]; animation: breathe 2.4s ease-in-out infinite; }
+  .dot-run { @apply bg-crt; }
+  .dot-wait { @apply bg-amber; animation: breathe 2.4s ease-in-out infinite; }
 
   /* Release notes arrive as HTML rendered from GitHub's Markdown, so they are styled by element. */
   .notes { @apply text-sm leading-[1.7] text-crt-prose; }

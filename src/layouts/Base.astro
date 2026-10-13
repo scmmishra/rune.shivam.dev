@@ -36,7 +36,7 @@ const commands = [
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
-		<meta name="theme-color" content="#060b07" />
+		<meta name="theme-color" content="#0a0a0a" />
 		<title>{title}</title>
 		<link rel="icon" href={logoDataUri} />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,7 +44,7 @@ const commands = [
 		<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 	</head>
 
-	<body class="tube min-h-svh bg-crt-bg font-mono text-sm text-crt-prose antialiased selection:bg-crt selection:text-crt-bg">
+	<body class="min-h-svh bg-crt-bg font-mono text-sm text-crt-prose antialiased selection:bg-crt selection:text-crt-bg">
 		<div class="mx-auto grid max-w-[104rem] gap-2 p-2 lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[14rem_minmax(0,1fr)_22rem]">
 			<!-- Leading column -->
 			<div class="grid [scrollbar-width:none] content-start gap-2 font-mono text-[0.8125rem] lg:sticky lg:top-2 lg:h-[calc(100svh-1rem)] lg:grid-rows-[auto_auto_minmax(0,1fr)]">
@@ -108,11 +108,6 @@ const commands = [
 
 						<footer class="mt-20 border-t border-crt-line pt-6 text-sm leading-6 text-crt-dim">
 							<p>
-								Powered by <a class="text-crt hover:text-crt-bright" href="https://ghostty.org/">Ghostty</a>.
-								File icons from the <a class="text-crt hover:text-crt-bright" href="https://github.com/TheRedXD/zed-icons-colored-theme">Colored Zed Icons Theme</a>.
-								Diagrams drawn by <a class="text-crt hover:text-crt-bright" href="https://github.com/lukilabs/beautiful-mermaid-swift">BeautifulMermaid</a>.
-							</p>
-							<p class="mt-1">
 								Released under the <a class="text-crt hover:text-crt-bright" href={`${REPO}/blob/main/LICENSE`}>MIT License</a>.
 								<a class="text-crt hover:text-crt-bright" href={`${REPO}/issues`}>Report an issue &#8599;</a>
 							</p>
