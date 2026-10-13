@@ -14,6 +14,13 @@
   --color-bezel-edge: #343934;
 }
 
+/* Text and arcade sit side by side. The arcade is fixed to the viewport
+   there, so the viewport must also be tall enough to hold it.
+   Keep in sync with the media queries in Arcade.astro. */
+@custom-variant split {
+  @media (min-width: 64rem) and (min-height: 30rem) { @slot; }
+}
+
 html {
   scroll-behavior: smooth;
   background: #0b0d0b;
@@ -35,7 +42,7 @@ body {
   inset: 0;
   z-index: 20;
   pointer-events: none;
-  box-shadow: inset 0 0 14rem 3rem rgb(0 0 0 / 0.75);
+  box-shadow: inset 0 0 min(14rem, 35vmin) min(3rem, 8vmin) rgb(0 0 0 / 0.75);
 }
 
 /* Scanlines + aperture grille. */

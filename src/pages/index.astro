@@ -15,7 +15,7 @@ const repo = "https://github.com/scmmishra/rune";
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="Rune is your terminal, with the context you need." />
 		<title>Rune · Your terminal, with the context you need</title>
 		<link rel="icon" href={logoDataUri} />
@@ -24,10 +24,11 @@ const repo = "https://github.com/scmmishra/rune";
 		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 	</head>
 
-	<body class="tube mx-auto min-h-screen max-w-[100rem] bg-crt-bg font-mono text-crt antialiased selection:bg-crt selection:text-crt-bg">
+	<body class="tube min-h-svh bg-crt-bg font-mono text-crt antialiased selection:bg-crt selection:text-crt-bg">
 		<div class="retrace" aria-hidden="true"></div>
 
-		<div class="power-on px-5 py-8 text-[0.8125rem] leading-6 sm:px-10 sm:py-12 sm:leading-7 xl:w-1/2">
+		<div class="mx-auto max-w-[100rem]">
+		<div class="power-on px-5 py-8 text-[0.8125rem] leading-6 sm:px-10 sm:py-12 sm:leading-7 split:w-1/2">
 			<header class="boot flex flex-wrap items-center gap-x-8 gap-y-3">
 				<a class="flex items-center gap-2.5" href="/" aria-label="Rune home">
 					<span class="block size-6 [&>svg]:size-full" aria-hidden="true" set:html={logoSvg} />
@@ -101,5 +102,6 @@ const repo = "https://github.com/scmmishra/rune";
 			</main>
 		</div>
 		<Arcade />
+		</div>
 	</body>
 </html>

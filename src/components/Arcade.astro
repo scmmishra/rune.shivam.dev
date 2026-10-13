@@ -48,18 +48,18 @@
 
 <style>
   .arcade { margin: 1rem 1.25rem 3rem; color: var(--color-crt); font-size: .6875rem; letter-spacing: .06em; }
-  .arcade-hud, .arcade-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .arcade-hud, .arcade-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1rem; }
   .arcade-hud { padding-block: 1rem; border-bottom: 1px solid rgb(77 224 122 / .16); }
   .bright { color: var(--color-crt-bright); }
-  .arcade-field { position: relative; min-height: 0; flex: 1; display: flex; justify-content: center; }
-  canvas { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; touch-action: none; }
+  .arcade-field { position: relative; min-height: 0; flex: 1; display: flex; justify-content: center; container-type: inline-size; }
+  canvas { display: block; width: 100%; height: auto; min-height: 0; object-fit: contain; touch-action: none; }
   canvas:focus-visible { outline: 1px dashed var(--color-crt-dim); outline-offset: .25rem; }
   .arcade-menu { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
   .arcade-menu[hidden], button[hidden] { display: none; }
   .arcade-wave { position: absolute; top: 42%; inset-inline: 0; text-align: center; font-size: .625rem; letter-spacing: .15em; pointer-events: none; }
   .arcade-boss { position: absolute; top: 1rem; inset-inline: 0; text-align: center; font-size: .625rem; pointer-events: none; }
   .arcade-kicker { font-size: .625rem; letter-spacing: .2em; }
-  h2 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.4; letter-spacing: -.06em; color: var(--color-crt-bright); margin-block: .5rem; }
+  h2 { font-size: clamp(1.5rem, 9cqi, 3.5rem); line-height: 1.4; letter-spacing: -.06em; color: var(--color-crt-bright); margin-block: .5rem; }
   .arcade-message { max-width: 20rem; line-height: 1.8; letter-spacing: 0; }
   button { cursor: pointer; color: var(--color-crt-bright); }
   [data-start] { margin-top: 1.75rem; padding: .6rem 1rem; border: 1px solid var(--color-crt-dim); }
@@ -75,9 +75,12 @@
   .arcade-dev label { display: flex; align-items: center; gap: .375rem; }
   .arcade-dev input { accent-color: var(--color-crt); }
   .arcade-dev select { color: var(--color-crt-bright); background: var(--color-crt-bg); border: 1px solid var(--color-crt-dim); padding: .2rem; }
-  @media (max-width: 79.999rem) { .arcade-field { height: min(70vh, 36rem); } }
-  @media (min-width: 40rem) and (max-width: 79.999rem) { .arcade { margin-inline: 2.5rem; max-width: 40rem; } }
-  @media (min-width: 80rem) {
-    .arcade { position: fixed; inset-block: 2rem; left: calc(50% + 1.5rem); width: calc(min(50%, 50rem) - 4rem); margin: 0; display: flex; flex-direction: column; }
+  /* Stacked: the canvas keeps its own aspect ratio, and the width cap keeps the whole field inside a short viewport. */
+  .arcade { max-width: max(16rem, min(85svh, 36rem) * 500 / 520); }
+  @media (min-width: 40rem) { .arcade { margin-inline: 2.5rem; } }
+  /* Side by side. Keep in sync with the split variant in global.css. */
+  @media (min-width: 64rem) and (min-height: 30rem) {
+    .arcade { position: fixed; inset-block: 2rem; left: calc(50% + 1.5rem); width: calc(min(50%, 50rem) - 4rem); max-width: none; margin: 0; display: flex; flex-direction: column; }
+    canvas { height: 100%; }
   }
 </style>
