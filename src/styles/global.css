@@ -19,6 +19,8 @@
 }
 
 html {
+  /* Above 1600px wide, type and spacing grow with the viewport, up to 125%. */
+  font-size: clamp(100%, 0.45vw + 0.55rem, 125%);
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
   background: var(--color-crt-bg);
