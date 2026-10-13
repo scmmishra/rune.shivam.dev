@@ -1,107 +1,228 @@
 ---
-import "../styles/global.css";
-import Arcade from "../components/Arcade.astro";
-import { logoSvg, logoDataUri } from "../lib/logo";
+import Base, { type Entry } from "../layouts/Base.astro";
+import Window from "../components/Window.astro";
+import { latest } from "../lib/releases";
+import { REPO, DOWNLOAD, CARDS_SPEC, REQUIREMENTS } from "../lib/site";
 
-const features = [
-	{ term: "terminal", text: "A Ghostty-powered terminal sits alongside the project context you reach for most." },
-	{ term: "changes", text: "Browse diffs and Git history without stepping out of your workspace." },
-	{ term: "palette", text: "Files, commands, branches, and projects, one keystroke away." },
+type Feature = { name: string; text: string; keys?: string[] };
+type Group = { id: string; title: string; blurb: string; features: Feature[] };
+
+const groups: Group[] = [
+	{
+		id: "terminals",
+		title: "Terminals",
+		blurb: "A Ghostty-powered terminal sits in the middle of every window. Everything else is arranged around it.",
+		features: [
+			{ name: "Tabs", text: "Every shell gets a tab. Hold ⌘ to see each tab's number.", keys: ["⌘1–9"] },
+			{ name: "Splits", text: "Split the focused terminal into columns or rows. Drag the gap to resize, or double-click it to make the panes equal.", keys: ["⌘D", "⇧⌘D"] },
+			{ name: "Zoom", text: "Grow the focused pane over the others. Press again to put it back.", keys: ["⇧⌘↩"] },
+			{ name: "Peek", text: "Hold ⌘ and a number to look at another terminal until you let go. ⌥-click a tab to open it beside the one you are in." },
+			{ name: "Waiting for you", text: "When an agent rings the bell or sends a notification, its tab's dot turns amber. It keeps breathing until you visit." },
+			{ name: "Program icons", text: "A tab shows a tile for the program running in it: Claude Code, Codex, Node, Python, Git, Vim, Docker and others." },
+			{ name: "Usage per pane", text: "A pane's header shows the memory and CPU of its processes, and the ports they listen on. Click a port to open it in your browser." },
+			{ name: "File links", text: "⌘-click a file path in terminal output. It opens in Rune, on the line the link names." },
+		],
+	},
+	{
+		id: "files",
+		title: "Files",
+		blurb: "Read and edit a file without leaving the terminal's window.",
+		features: [
+			{ name: "File tree", text: "Changed files are marked M or U. Right-click to create, rename, duplicate, trash or reveal a file." },
+			{ name: "Open quickly", text: "Find a file by name with a fuzzy search.", keys: ["⌘P"] },
+			{ name: "Search in project", text: "Search file contents as you type. Results are grouped by file and skip gitignored, binary and very large files.", keys: ["⇧⌘F"] },
+			{ name: "File preview", text: "A drawer slides over the terminal with line numbers. It marks the lines that differ from the last commit and shows who last changed a line." },
+			{ name: "Markdown", text: "Markdown opens rendered, with Mermaid diagrams drawn inline. Hover a code block to copy it." },
+			{ name: "Images", text: "Images and SVG files open as pictures." },
+		],
+	},
+	{
+		id: "git",
+		title: "Git",
+		blurb: "See what changed, commit it, and read the history beside your shell.",
+		features: [
+			{ name: "Changes", text: "Stage files, read diffs and commit. The commit box is one line until you click it.", keys: ["⌘↩"] },
+			{ name: "History", text: "A commit graph covers your branch and the branch it compares against. Commits carry labels for branches and tags, and the list loads as you scroll." },
+			{ name: "Branches", text: "Switch branches from the command palette. Recently updated branches come first." },
+			{ name: "Change Brief", text: "Get an explanation of your working tree, staged changes or pull request, with diagrams and links back to the code. It uses your installed Codex or Claude Code, and saves each brief." },
+		],
+	},
+	{
+		id: "commands",
+		title: "Commands",
+		blurb: "Keep a project's dev servers and tasks one click away.",
+		features: [
+			{ name: "Found for you", text: "Rune reads commands from your Procfile and your mise tasks. You can save your own for each project." },
+			{ name: "Process groups", text: "One command can hold several processes that start together. Start or stop the whole group, or one process at a time." },
+			{ name: "Run and watch", text: "Start, stop and rerun from the card. A running command opens beside your terminal instead of taking a tab." },
+			{ name: "Cleaned up", text: "Rune stops a command's processes when its terminal closes, and when Rune quits, crashes or is force-quit." },
+		],
+	},
+	{
+		id: "agents",
+		title: "Agents",
+		blurb: "Rune does not run a model. It works with the Claude Code and Codex you already have.",
+		features: [
+			{ name: "Plan usage", text: "A card shows how much of your Claude Code and Codex plans is left, and when each limit resets. It never asks for Keychain access." },
+			{ name: "Agent threads", text: "A card item can open a Claude Code session tied to a key, such as a ticket's ID. Later clicks resume that same session, including after a relaunch." },
+			{ name: "Named tabs", text: "A tab takes the name of the agent running inside it and shows a green dot while the agent works." },
+		],
+	},
+	{
+		id: "layout",
+		title: "Layout",
+		blurb: "A window is columns of cards around the terminals. You decide where each card goes.",
+		features: [
+			{ name: "Rearrange", text: "Drag a card by its header: within its column, into another column, or into a new one at a window edge. Rune remembers the arrangement for each project." },
+			{ name: "Share it", text: "Save the arrangement to .rune/space.json in the repository. Everyone who opens the project in Rune gets it." },
+			{ name: "Setups", text: "A setup is a named arrangement for a project, opened in its own window. The same project can be open in several setups, each with its own terminals." },
+			{ name: "Add and remove", text: "Right-click a card to remove it, and add it back from the same menu. You can also hide the main terminal." },
+			{ name: "Command palette", text: "Run any command, switch project, branch or terminal. Typing also searches inside each command, so a branch name finds its switch.", keys: ["⇧⌘P"] },
+			{ name: "Restores", text: "Rune remembers your last project, window layout and expanded folders." },
+		],
+	},
 ];
 
-const repo = "https://github.com/scmmishra/rune";
+const shortcuts = [
+	{ keys: ["⌘1–9"], text: "Switch to a tab" },
+	{ keys: ["⇧⌘[", "⇧⌘]"], text: "Previous or next terminal" },
+	{ keys: ["⌘D", "⇧⌘D"], text: "Split into columns or rows" },
+	{ keys: ["⌥⌘←↑↓→"], text: "Move between panes" },
+	{ keys: ["⇧⌘↩"], text: "Zoom the focused pane" },
+	{ keys: ["⌃⌘←↑↓→"], text: "Move the nearest divider" },
+	{ keys: ["⌃⌘="], text: "Make panes equal" },
+	{ keys: ["⌘W"], text: "Close the focused pane" },
+	{ keys: ["⇧⌘P"], text: "Command palette" },
+	{ keys: ["⌘P"], text: "Open a file by name" },
+	{ keys: ["⇧⌘F"], text: "Search in project" },
+	{ keys: ["⇧⌘O"], text: "Switch project" },
+	{ keys: ["⌘F"], text: "Find in the open file" },
+	{ keys: ["⌘↩"], text: "Commit" },
+];
+
+const cardFile = `title = "Conversations"
+refresh = 60
+
+source = '''
+chatwoot convs -o json | jq '{items: [.data.payload[] | {
+  id: (.id | tostring),
+  title: .meta.sender.name,
+  subtitle: .last_message,
+  badge: {text: .status, tint: "green"},
+  action: {set: {conversation: (.id | tostring)}}
+}]}'
+'''`;
+
+const cardFacts: Feature[] = [
+	{ name: "One file", text: "A card is a TOML file in ~/.rune/cards. Its source is a script in any language." },
+	{ name: "Content", text: "The script prints JSON: a list of items, a conversation's messages, or a page of Markdown." },
+	{ name: "Actions", text: "An item can open a link, open a file, start an agent thread, or set a variable that other cards react to." },
+	{ name: "Refresh", text: "A card runs again on a timer, when a variable it reads changes, or when you click refresh." },
+];
+
+const entries: Entry[] = [
+	{ label: "README.md", href: "#readme" },
+	{ label: "features", href: "#terminals", folder: true },
+	...groups.map(group => ({ label: group.title.toLowerCase(), href: `#${group.id}`, depth: 1 })),
+	{ label: "custom-cards", href: "#cards" },
+	{ label: "shortcuts", href: "#shortcuts" },
+	{ label: "install", href: "#install" },
+];
+
+const link = "text-crt underline decoration-crt-dim underline-offset-4 transition hover:text-crt-bright";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="Rune is your terminal, with the context you need." />
-		<title>Rune · Your terminal, with the context you need</title>
-		<link rel="icon" href={logoDataUri} />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-	</head>
+<Base
+	title="Rune · Your terminal, with the context you need"
+	description="Rune is a native macOS workspace for terminal-first development. Files, diffs, Git history and your agents sit around a Ghostty-powered terminal."
+	tab="readme"
+	entries={entries}
+>
+	<section id="readme" class="text-[0.9375rem] leading-7">
+		<h1 class="glow font-display text-[clamp(2rem,5.5vw,3.25rem)] leading-[1.08] font-black text-balance text-crt-bright">
+			Your terminal, with the context you need
+		</h1>
+		<p class="mt-6">
+			Rune is a small, native macOS workspace for people who work in a terminal.
+			Your shell stays at the center of the window.
+			Files, diffs, Git history and your coding agents sit around it as cards you can rearrange.
+		</p>
+		<p class="mt-4">
+			It is free and open source.{" "}
+			<a class={link} href={DOWNLOAD}>Download {latest.version}</a>, or <a class={link} href={REPO}>read the source</a>.{" "}
+			<span class="text-crt-dim">Needs {REQUIREMENTS.replace(" · ", " on ")}.</span>
+		</p>
+	</section>
 
-	<body class="tube min-h-svh bg-crt-bg font-mono text-crt antialiased selection:bg-crt selection:text-crt-bg">
-		<div class="retrace" aria-hidden="true"></div>
+	<div class="mt-10 max-w-none!">
+		<Window />
+	</div>
 
-		<div class="mx-auto max-w-[100rem]">
-		<div class="power-on px-5 py-8 text-[0.8125rem] leading-6 sm:px-10 sm:py-12 sm:leading-7 split:w-1/2">
-			<header class="boot flex flex-wrap items-center gap-x-8 gap-y-3">
-				<a class="flex items-center gap-2.5" href="/" aria-label="Rune home">
-					<span class="block size-6 [&>svg]:size-full" aria-hidden="true" set:html={logoSvg} />
-					<span class="glow-hi font-semibold text-crt-bright">rune</span>
-				</a>
-				<nav class="flex flex-wrap gap-x-6 gap-y-2">
-					<a class="glow transition hover:text-crt-bright" href="#features">features</a>
-					<a class="glow transition hover:text-crt-bright" href="#brief">brief</a>
-					<a class="glow transition hover:text-crt-bright" href={repo}>source</a>
-				</nav>
-			</header>
-
-			<main class="boot mt-10">
-				<section>
-					<h2 class="glow font-semibold tracking-[0.12em] text-crt-bright">NAME</h2>
-					<h1 class="glow-hi mt-2 max-w-xl text-pretty text-base font-medium leading-7 text-crt-bright sm:text-xl sm:leading-8">
-						rune &mdash; your terminal, with the context you need
-					</h1>
-				</section>
-
-				<section class="mt-8">
-					<h2 class="glow font-semibold tracking-[0.12em] text-crt-bright">SYNOPSIS</h2>
-					<div class="mt-2 flex flex-wrap gap-x-6 gap-y-2">
-						<a class="glow-hi border-b border-crt-bright/40 pb-0.5 text-crt-bright transition hover:bg-crt-bright hover:text-crt-bg" href={repo}>
-							install rune
-						</a>
-						<a class="glow border-b border-crt/25 pb-0.5 transition hover:bg-crt hover:text-crt-bg" href={repo}>
-							read the source &#8599;
-						</a>
+	{groups.map(group => (
+		<section id={group.id} class="mt-16">
+			<h2 class="font-display text-2xl font-black text-crt-bright sm:text-3xl">{group.title}</h2>
+			<p class="mt-2 leading-7">{group.blurb}</p>
+			<dl class="mt-5">
+				{group.features.map(feature => (
+					<div class="border-t border-crt-line py-3 sm:grid sm:grid-cols-[10.5rem_1fr] sm:gap-6">
+						<dt class="flex flex-wrap items-center gap-x-2 gap-y-1 self-start font-mono text-[0.8125rem] leading-6 text-crt-bright sm:block">
+							{feature.name}
+							{feature.keys && <span class="flex gap-1 sm:mt-1">{feature.keys.map(key => <kbd class="kbd">{key}</kbd>)}</span>}
+						</dt>
+						<dd class="mt-1 text-sm leading-6 sm:mt-0">{feature.text}</dd>
 					</div>
-				</section>
+				))}
+			</dl>
+		</section>
+	))}
 
-				<section class="mt-8">
-					<h2 class="glow font-semibold tracking-[0.12em] text-crt-bright">DESCRIPTION</h2>
-					<p class="glow mt-2 max-w-xl text-pretty">
-						A small, native macOS workspace for terminal-first development.
-						Keep your shell, files, diffs, and Git history close at hand.
-					</p>
-				</section>
-
-				<section id="features" class="mt-8 scroll-mt-8">
-					<h2 class="glow font-semibold tracking-[0.12em] text-crt-bright">FEATURES</h2>
-					<dl class="mt-2">
-						{features.map(({ term, text }) => (
-							<div class="mt-2 first:mt-0 sm:flex sm:gap-6">
-								<dt class="glow-hi shrink-0 text-crt-bright sm:w-24">{term}</dt>
-								<dd class="glow max-w-xl text-pretty">{text}</dd>
-							</div>
-						))}
-					</dl>
-				</section>
-
-				<section id="brief" class="mt-8 scroll-mt-8">
-					<h2 class="glow font-semibold tracking-[0.12em] text-crt-bright">CHANGE BRIEF</h2>
-					<p class="glow mt-2 max-w-xl text-pretty">
-						Understand the change before you read the diff. Rune explains your
-						working tree, staged changes, or pull request, and links every claim
-						back to the code.
-					</p>
-				</section>
-
-				<section class="mt-8">
-					<h2 class="glow font-semibold tracking-[0.12em] text-crt-bright">SEE ALSO</h2>
-					<p class="mt-2">
-						<a class="glow border-b border-crt/25 pb-0.5 transition hover:bg-crt hover:text-crt-bg" href={repo}>
-							github.com/scmmishra/rune
-						</a>
-					</p>
-				</section>
-
-			</main>
+	<section id="cards" class="mt-16">
+		<h2 class="font-display text-2xl font-black text-crt-bright sm:text-3xl">Custom cards</h2>
+		<p class="mt-2 leading-7">
+			A card can be yours. Put anything a script can print next to your terminal: support conversations, tickets, deploys, a build queue.
+			This file is the Conversations card in the customer support window above.
+		</p>
+		<div class="card mt-5 bg-crt-bg p-4">
+			<p class="card-head tracking-normal normal-case">~/.rune/cards/conversations.toml</p>
+			<pre class="mt-3 overflow-x-auto font-mono text-[0.8125rem] leading-6 text-crt"><code>{cardFile}</code></pre>
 		</div>
-		<Arcade />
-		</div>
-	</body>
-</html>
+		<dl class="mt-5">
+			{cardFacts.map(fact => (
+				<div class="border-t border-crt-line py-3 sm:grid sm:grid-cols-[10.5rem_1fr] sm:gap-6">
+					<dt class="font-mono text-[0.8125rem] leading-6 text-crt-bright">{fact.name}</dt>
+					<dd class="mt-1 text-sm leading-6 sm:mt-0">{fact.text}</dd>
+				</div>
+			))}
+		</dl>
+		<p class="mt-4"><a class={link} href={CARDS_SPEC}>Read the card format &#8599;</a></p>
+	</section>
+
+	<section id="shortcuts" class="mt-16">
+		<h2 class="font-display text-2xl font-black text-crt-bright sm:text-3xl">Shortcuts</h2>
+		<p class="mt-2 leading-7">Terminal shortcuts match Ghostty. The welcome window teaches the rest by having you press them.</p>
+		<dl class="mt-5 sm:columns-2 sm:gap-10">
+			{shortcuts.map(row => (
+				<div class="flex break-inside-avoid items-center justify-between gap-4 border-t border-crt-line py-2">
+					<dt>{row.text}</dt>
+					<dd class="flex shrink-0 gap-1">{row.keys.map(key => <kbd class="kbd">{key}</kbd>)}</dd>
+				</div>
+			))}
+		</dl>
+	</section>
+
+	<section id="install" class="mt-16">
+		<h2 class="font-display text-2xl font-black text-crt-bright sm:text-3xl">Install</h2>
+		<ol class="mt-4 grid gap-2 leading-7">
+			<li class="flex gap-3"><span class="font-mono text-crt-dim">1</span><span><a class={link} href={DOWNLOAD}>Download Rune-arm64.zip</a> and unzip it.</span></li>
+			<li class="flex gap-3"><span class="font-mono text-crt-dim">2</span><span>Move Rune to your Applications folder.</span></li>
+			<li class="flex gap-3"><span class="font-mono text-crt-dim">3</span><span>Open it. Rune is not notarized by Apple, so macOS may ask you to approve it in Privacy &amp; Security the first time.</span></li>
+		</ol>
+		<p class="mt-5 leading-7">The welcome window can install a <span class="text-crt">rune</span> command, so you can open a folder from your shell:</p>
+		<pre class="card mt-3 overflow-x-auto bg-crt-bg p-4 font-mono text-[0.8125rem] leading-6 text-crt"><code><span class="text-crt-dim">❯</span> <span class="text-crt-bright">rune</span>              <span class="text-crt-dim"># open the current folder</span>
+<span class="text-crt-dim">❯</span> <span class="text-crt-bright">rune ~/code/api</span>   <span class="text-crt-dim"># open another one</span></code></pre>
+		<p class="mt-5 leading-7">
+			Rune updates itself, and every update is signed.
+			Each release is listed in the <a class={link} href="/changelog">changelog</a>.
+		</p>
+	</section>
+</Base>

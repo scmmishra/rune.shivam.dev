@@ -1,0 +1,28 @@
+---
+import Base from "../layouts/Base.astro";
+import { releases } from "../lib/releases";
+import { REPO } from "../lib/site";
+
+const entries = releases.map(release => ({ label: release.version, href: `#${release.version}` }));
+---
+
+<Base title="Changelog · Rune" description="Every Rune release and what changed in it." tab="changelog" entries={entries}>
+	<section>
+		<h1 class="glow font-display text-[clamp(2rem,5.5vw,3.25rem)] leading-[1.08] font-black text-crt-bright">Changelog</h1>
+		<p class="mt-6 text-[0.9375rem] leading-7">
+			{releases.length} releases, newest first.
+			These notes come from the <a class="text-crt underline decoration-crt-dim underline-offset-4 hover:text-crt-bright" href={`${REPO}/releases`}>GitHub releases</a>.
+			Rune updates itself, so an installed copy already has the latest one.
+		</p>
+	</section>
+
+	{releases.map(release => (
+		<section id={release.version} class="mt-14 border-t border-crt-line pt-6">
+			<h2 class="flex items-baseline justify-between gap-4 font-mono">
+				<a class="text-lg font-semibold text-crt-bright hover:underline" href={release.url}>{release.version}</a>
+				<time class="text-xs text-crt-dim" datetime={release.isoDate}>{release.date}</time>
+			</h2>
+			<div class="notes mt-5" set:html={release.html} />
+		</section>
+	))}
+</Base>

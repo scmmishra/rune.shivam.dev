@@ -1,0 +1,334 @@
+---
+// Two sketches of a Rune window, each a real arrangement of cards around the hub.
+// Both are live: tabs switch in the first, and conversations drive the second.
+const examples = [
+	{ id: "dev", label: "Development", caption: "Click a tab. The amber dot marks a terminal that is waiting for you, and clears when you visit it." },
+	{ id: "support", label: "Customer support", caption: "A setup with two custom cards. Click a conversation: the chat reloads and that conversation's agent thread opens." },
+];
+
+const tabs = [
+	{ id: "main", label: "Main", tiles: [">_"], dot: "" },
+	{ id: "claude", label: "claude", tiles: ["✳"], dot: "dot-wait" },
+	{ id: "dev", label: "dev", tiles: ["py", "js"], dot: "dot-run" },
+];
+
+const files = [
+	{ depth: 0, name: "app", folder: "open", mark: "dot" },
+	{ depth: 1, name: "billing", folder: "open", mark: "dot" },
+	{ depth: 2, name: "invoice.rb", mark: "M" },
+	{ depth: 2, name: "refund.rb", mark: "M" },
+	{ depth: 0, name: "spec", folder: "closed", mark: "dot" },
+	{ depth: 0, name: "Procfile" },
+];
+
+const changes = [
+	{ mark: "M", name: "billing/invoice.rb", added: 2 },
+	{ mark: "M", name: "billing/refund.rb", added: 4 },
+	{ mark: "U", name: "spec/refund_spec.rb", added: 31 },
+];
+
+const history = [
+	{ label: "main", text: "fix: round refunds half-even", head: true },
+	{ text: "feat: allow partial refunds" },
+	{ label: "v2.4.0", text: "chore: release 2.4.0" },
+];
+
+const conversations = [
+	{
+		id: "4821",
+		name: "Priya Nair",
+		subject: "Refund not received",
+		badge: "open",
+		messages: [
+			{ from: "Priya", text: "I cancelled on the 2nd and was told the refund takes 5 days. It has been 9." },
+			{ from: "You", text: "Sorry about that. I am checking what happened to it now." },
+			{ from: "Priya", text: "Thanks. The order number is 77102." },
+		],
+		thread: [
+			{ kind: "prompt", text: "why has the refund for order 77102 not gone out?" },
+			{ kind: "step", text: "Bash  rails runner 'puts Refund.find_by(order: 77102).state'" },
+			{ kind: "step", text: "Read  app/jobs/refund_job.rb" },
+			{ kind: "answer", text: "The refund is stuck in `queued`. RefundJob raised on a nil currency and was never retried." },
+			{ kind: "ask", text: "Retry the job for order 77102?  ❯ Yes   No" },
+		],
+	},
+	{
+		id: "4830",
+		name: "Tomás Rivera",
+		subject: "Webhook fires twice",
+		badge: "pending",
+		messages: [
+			{ from: "Tomás", text: "Every message_created webhook reaches us twice, about a second apart." },
+			{ from: "You", text: "Does it happen on every inbox, or only the API one?" },
+			{ from: "Tomás", text: "Only the API inbox." },
+		],
+		thread: [
+			{ kind: "prompt", text: "API inbox sends message_created twice. find out why" },
+			{ kind: "step", text: "Grep  message_created  app/listeners" },
+			{ kind: "step", text: "Read  app/listeners/webhook_listener.rb" },
+			{ kind: "answer", text: "Two listeners subscribe to the event for API inboxes. The second was added with the agent bot hook." },
+		],
+	},
+];
+---
+
+<figure class="@container" data-window>
+	<div class="flex flex-wrap items-center gap-1 font-mono text-xs" role="tablist" aria-label="Example windows">
+		{examples.map((example, index) => (
+			<button
+				type="button"
+				role="tab"
+				aria-selected={index === 0 ? "true" : "false"}
+				aria-controls={`example-${example.id}`}
+				data-example-tab={example.id}
+				class="cursor-pointer rounded-md border border-transparent px-2.5 py-1 text-crt-dim transition hover:text-crt aria-selected:border-crt-line aria-selected:bg-crt-raised aria-selected:text-crt-bright"
+			>{example.label}</button>
+		))}
+	</div>
+
+	<div class="card mt-2 overflow-hidden bg-crt-bg p-2 font-mono text-[0.6875rem] leading-5 text-crt shadow-[0_0_5rem_rgb(77_224_122/0.07)]">
+		<!-- Development: Commands and Files, the hub, then Changes and History -->
+		<div id="example-dev" role="tabpanel" data-example="dev" class="grid gap-2 @lg:grid-cols-[minmax(0,1fr)_12.5rem] @2xl:grid-cols-[10.5rem_minmax(0,1fr)_12.5rem]">
+			<div class="hidden min-w-0 grid-cols-1 content-start gap-2 @2xl:grid" aria-hidden="true">
+				<section class="card p-2.5">
+					<h3 class="card-head"><span>Commands</span><span>+</span></h3>
+					<ul class="mt-1.5">
+						<li class="flex items-center gap-2"><span class="text-crt-bright">dev</span><span class="ms-auto text-crt-dim">3</span><span class="dot dot-run"></span></li>
+						<li class="flex items-center gap-2 text-crt-dim"><span>├</span><span class="text-crt">web</span><span class="dot dot-run ms-auto"></span></li>
+						<li class="flex items-center gap-2 text-crt-dim"><span>├</span><span class="text-crt">worker</span><span class="dot dot-run ms-auto"></span></li>
+						<li class="flex items-center gap-2 text-crt-dim"><span>└</span><span class="text-crt">css</span><span class="dot dot-run ms-auto"></span></li>
+						<li class="flex items-center gap-2"><span>test</span><span class="dot ms-auto"></span></li>
+					</ul>
+				</section>
+				<section class="card p-2.5">
+					<h3 class="card-head"><span>Files</span><span class="tracking-normal normal-case text-crt">api ▾</span></h3>
+					<ul class="mt-1.5">
+						{files.map(file => (
+							<li class="flex items-center gap-1.5" style={`padding-inline-start: ${file.depth * 0.625}rem`}>
+								<span class="w-2 text-crt-dim">{file.folder === "open" ? "▾" : file.folder === "closed" ? "▸" : ""}</span>
+								<span class:list={[file.mark === "M" && "text-crt-bright"]}>{file.name}</span>
+								{file.mark === "dot" && <span class="ms-auto size-1 rounded-full bg-crt-dim"></span>}
+								{file.mark === "M" && <span class="ms-auto text-crt-bright">M</span>}
+							</li>
+						))}
+					</ul>
+				</section>
+			</div>
+
+			<div class="card flex min-h-[17rem] min-w-0 flex-col overflow-hidden">
+				<div class="flex items-center gap-1 border-b border-crt-line p-1.5" role="tablist" aria-label="Terminal tabs in this sketch">
+					{tabs.map((tab, index) => (
+						<button
+							type="button"
+							role="tab"
+							aria-selected={index === 0 ? "true" : "false"}
+							aria-controls={`pane-${tab.id}`}
+							data-tab={tab.id}
+							class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-0.5 text-crt-dim transition hover:text-crt aria-selected:bg-crt-raised aria-selected:text-crt-bright"
+						>
+							<span class="flex -space-x-1.5">
+								{tab.tiles.map(tile => <span class="grid size-4 place-items-center rounded border border-crt-line bg-crt-panel text-[0.5625rem] leading-none text-crt">{tile}</span>)}
+							</span>
+							{tab.label}
+							<span class:list={["dot", tab.dot]} data-dot></span>
+						</button>
+					))}
+					<span class="px-1.5 text-crt-dim" aria-hidden="true">+</span>
+				</div>
+
+				<div id="pane-main" role="tabpanel" data-pane="main" class="flex-1 p-3.5 leading-6">
+					<p class="text-crt-dim">~/code/api <span class="text-crt">main</span></p>
+					<p><span class="text-crt-dim">❯</span> <span class="text-crt-bright">git status -sb</span></p>
+					<p>## main...origin/main [ahead 1]</p>
+					<p>&nbsp;M app/billing/invoice.rb</p>
+					<p>&nbsp;M app/billing/refund.rb</p>
+					<p>?? spec/refund_spec.rb</p>
+					<p><span class="text-crt-dim">❯</span> <span class="cursor"></span></p>
+				</div>
+
+				<div id="pane-claude" role="tabpanel" data-pane="claude" class="flex-1 p-3.5 leading-6" hidden>
+					<p class="text-crt-bright">✳ Claude Code</p>
+					<p class="text-crt-dim">&gt; fix the rounding error in refunds</p>
+					<p>● Read app/billing/refund.rb</p>
+					<p>● Edit app/billing/refund.rb <span class="text-crt-bright">+4</span> <span class="text-crt-dim">−1</span></p>
+					<p>● Bash bundle exec rspec spec/refund_spec.rb</p>
+					<p class="mt-2 inline-block rounded border border-amber/40 px-2 text-amber">Allow this command? &nbsp;❯ Yes &nbsp; No</p>
+				</div>
+
+				<div id="pane-dev" role="tabpanel" data-pane="dev" class="grid flex-1 gap-1.5 p-1.5 @lg:grid-cols-2" hidden>
+					<div class="card min-w-0 bg-crt-bg p-2.5">
+						<p class="flex flex-wrap gap-x-2 text-crt-dim"><span class="text-crt-bright">node</span><span class="ms-auto">182 MB</span><span>12%</span><span class="text-crt">:3000</span></p>
+						<p class="mt-2"><span class="text-crt-dim">❯</span> pnpm dev</p>
+						<p>ready on localhost:3000</p>
+						<p class="text-crt-dim">GET /invoices 200 41ms</p>
+					</div>
+					<div class="card min-w-0 bg-crt-bg p-2.5 opacity-70">
+						<p class="flex flex-wrap gap-x-2 text-crt-dim"><span class="text-crt-bright">python</span><span class="ms-auto">96 MB</span><span>104%</span></p>
+						<p class="mt-2"><span class="text-crt-dim">❯</span> pytest -x -q</p>
+						<p>......................</p>
+						<p class="text-crt-dim">22 passed in 3.1s</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="hidden min-w-0 grid-cols-1 content-start gap-2 @lg:grid" aria-hidden="true">
+				<section class="card p-2.5">
+					<h3 class="card-head"><span>Changes <span class="text-crt">3</span></span><span class="tracking-normal normal-case text-crt">Brief ✦</span></h3>
+					<ul class="mt-1.5">
+						{changes.map(change => (
+							<li class="flex gap-2">
+								<span class="text-crt-bright">{change.mark}</span>
+								<span class="truncate">{change.name}</span>
+								<span class="ms-auto text-crt-dim">+{change.added}</span>
+							</li>
+						))}
+					</ul>
+					<p class="mt-2 flex justify-between rounded-md bg-crt-raised px-2 text-crt-dim"><span>Commit message</span><span>⌘↩</span></p>
+				</section>
+				<section class="card p-2.5">
+					<h3 class="card-head">History</h3>
+					<ul class="mt-1.5">
+						{history.map(commit => (
+							<li class="flex items-center gap-2">
+								<span class="relative grid w-2 shrink-0 place-items-center self-stretch">
+									<span class="absolute inset-y-0 w-px bg-crt-dim/60"></span>
+									<span class:list={["relative size-1.5 rounded-full", commit.head ? "bg-crt-bright" : "bg-crt-dim"]}></span>
+								</span>
+								{commit.label && <span class="shrink-0 rounded bg-crt/15 px-1 text-[0.625rem] text-crt-bright">{commit.label}</span>}
+								<span class="truncate">{commit.text}</span>
+							</li>
+						))}
+					</ul>
+				</section>
+				<section class="card p-2.5">
+					<h3 class="card-head">Usage</h3>
+					<p class="mt-1.5 flex items-center gap-2"><span>✳ Claude</span><span class="h-1 flex-1 rounded bg-crt-raised"><span class="block h-full w-[62%] rounded bg-crt"></span></span><span class="text-crt-dim">62%</span></p>
+				</section>
+			</div>
+		</div>
+
+		<!-- Customer support: Conversations, Chat, then the hub holding one agent thread per conversation -->
+		<div id="example-support" role="tabpanel" data-example="support" class="grid gap-2 @2xl:grid-cols-[11rem_13.5rem_minmax(0,1fr)]" hidden>
+			<div class="grid min-w-0 grid-cols-1 content-start gap-2">
+				<section class="card p-2.5">
+					<h3 class="card-head"><span>Conversations</span><span aria-hidden="true">↻</span></h3>
+					<ul class="mt-1.5 grid grid-cols-1 gap-0.5">
+						{conversations.map((conversation, index) => (
+							<li>
+								<button
+									type="button"
+									aria-pressed={index === 0 ? "true" : "false"}
+									data-conversation={conversation.id}
+									class="-mx-1 flex w-[calc(100%+0.5rem)] cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-start transition hover:bg-crt-raised aria-pressed:bg-crt-raised"
+								>
+									<span class="min-w-0">
+										<span class="block truncate text-crt-bright">{conversation.name}</span>
+										<span class="block truncate text-crt-dim">{conversation.subject}</span>
+									</span>
+									<span class:list={["ms-auto shrink-0 rounded px-1 text-[0.625rem]", conversation.badge === "open" ? "bg-crt/15 text-crt" : "bg-amber/15 text-amber"]}>{conversation.badge}</span>
+								</button>
+							</li>
+						))}
+					</ul>
+				</section>
+				<section class="card hidden p-2.5 @2xl:block" aria-hidden="true">
+					<h3 class="card-head"><span>Commands</span><span>+</span></h3>
+					<ul class="mt-1.5">
+						<li class="flex items-center gap-2"><span>app</span><span class="ms-auto text-crt-dim">3</span><span class="dot"></span></li>
+						<li class="flex items-center gap-2 text-crt-dim"><span>├</span><span class="text-crt">worker</span></li>
+						<li class="flex items-center gap-2 text-crt-dim"><span>├</span><span class="text-crt">server</span></li>
+						<li class="flex items-center gap-2 text-crt-dim"><span>└</span><span class="text-crt">vite</span></li>
+					</ul>
+				</section>
+				<section class="card hidden p-2.5 @2xl:block" aria-hidden="true">
+					<h3 class="flex gap-1.5 truncate"><span class="font-semibold text-crt-bright">chatwoot</span><span class="truncate text-crt-dim">Customer Support ▾</span></h3>
+					<ul class="mt-1.5">
+						{["app", "config", "lib", "spec"].map(folder => <li><span class="text-crt-dim">▸</span> {folder}</li>)}
+					</ul>
+				</section>
+			</div>
+
+			<section class="card min-w-0 p-2.5">
+				<h3 class="card-head">Chat</h3>
+				{conversations.map((conversation, index) => (
+					<ul class="mt-1.5 grid gap-2" data-for={conversation.id} hidden={index !== 0}>
+						{conversation.messages.map(message => (
+							<li>
+								<span class:list={["block text-[0.625rem] tracking-wider uppercase", message.from === "You" ? "text-crt" : "text-crt-dim"]}>{message.from}</span>
+								<span class="block leading-[1.125rem] text-crt-prose">{message.text}</span>
+							</li>
+						))}
+					</ul>
+				))}
+			</section>
+
+			<div class="card flex min-h-[17rem] min-w-0 flex-col overflow-hidden">
+				{conversations.map((conversation, index) => (
+					<div class="flex flex-1 flex-col" data-for={conversation.id} hidden={index !== 0}>
+						<div class="flex items-center gap-1 border-b border-crt-line p-1.5">
+							<span class="flex items-center gap-2 rounded-md bg-crt-raised px-2 py-0.5 text-crt-bright">
+								<span class="grid size-4 place-items-center rounded border border-crt-line bg-crt-panel text-[0.5625rem] leading-none text-crt">✳</span>
+								{conversation.name}
+								<span class:list={["dot", conversation.thread.some(line => line.kind === "ask") ? "dot-wait" : "dot-run"]}></span>
+							</span>
+							<span class="px-1.5 text-crt-dim" aria-hidden="true">+</span>
+						</div>
+						<div class="flex-1 p-3.5 leading-6">
+							<p class="text-crt-bright">✳ Claude Code <span class="text-crt-dim">· thread {conversation.id}</span></p>
+							{conversation.thread.map(line => (
+								line.kind === "prompt" ? <p class="text-crt-dim">&gt; {line.text}</p>
+								: line.kind === "step" ? <p class="truncate">● {line.text}</p>
+								: line.kind === "ask" ? <p class="mt-2 inline-block rounded border border-amber/40 px-2 text-amber">{line.text}</p>
+								: <p class="mt-2 text-crt-bright">{line.text}</p>
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
+
+	{examples.map((example, index) => (
+		<figcaption class="mt-2.5 font-mono text-xs leading-5 text-crt-dim" data-caption={example.id} hidden={index !== 0}>{example.caption}</figcaption>
+	))}
+</figure>
+
+<script>
+	const root = document.querySelector<HTMLElement>("[data-window]");
+	if (root) {
+		const all = <T extends HTMLElement>(selector: string) => [...root.querySelectorAll<T>(selector)];
+
+		const exampleTabs = all<HTMLButtonElement>("[data-example-tab]");
+		for (const tab of exampleTabs) {
+			tab.addEventListener("click", () => {
+				const id = tab.dataset.exampleTab;
+				for (const other of exampleTabs) other.setAttribute("aria-selected", String(other === tab));
+				for (const example of all("[data-example]")) example.hidden = example.dataset.example !== id;
+				for (const caption of all("[data-caption]")) caption.hidden = caption.dataset.caption !== id;
+			});
+		}
+
+		// ?example=support opens the page on that example, so it can be linked to.
+		const requested = new URLSearchParams(location.search).get("example");
+		exampleTabs.find(tab => tab.dataset.exampleTab === requested)?.click();
+
+		const tabs = all<HTMLButtonElement>("[data-tab]");
+		for (const tab of tabs) {
+			tab.addEventListener("click", () => {
+				for (const other of tabs) other.setAttribute("aria-selected", String(other === tab));
+				for (const pane of all("[data-pane]")) pane.hidden = pane.dataset.pane !== tab.dataset.tab;
+				// Visiting a terminal answers its request for attention.
+				tab.querySelector("[data-dot]")?.classList.replace("dot-wait", "dot-run");
+			});
+		}
+
+		// A conversation is a variable. The Chat card and the agent thread both read it.
+		const conversations = all<HTMLButtonElement>("[data-conversation]");
+		for (const item of conversations) {
+			item.addEventListener("click", () => {
+				for (const other of conversations) other.setAttribute("aria-pressed", String(other === item));
+				for (const bound of all("[data-for]")) bound.hidden = bound.dataset.for !== item.dataset.conversation;
+			});
+		}
+	}
+</script>

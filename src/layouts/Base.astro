@@ -1,0 +1,165 @@
+---
+// The page is laid out as a Rune window: card columns on both sides of the hub.
+// The hub holds the text. The columns hold what Rune's own cards hold.
+import "../styles/global.css";
+import Arcade from "../components/Arcade.astro";
+import { logoSvg, logoDataUri } from "../lib/logo";
+import { releases, latest } from "../lib/releases";
+import { REPO, DOWNLOAD, DOCS } from "../lib/site";
+
+export type Entry = { label: string; href: string; depth?: number; folder?: boolean };
+
+interface Props {
+	title: string;
+	description: string;
+	tab: "readme" | "changelog";
+	/** The Files card: this page's table of contents, drawn as a file tree. */
+	entries: Entry[];
+}
+
+const { title, description, tab, entries } = Astro.props;
+
+const tabs = [
+	{ id: "readme", label: "README.md", href: "/" },
+	{ id: "changelog", label: "CHANGELOG.md", href: "/changelog" },
+];
+
+const commands = [
+	{ label: `download ${latest.version}`, href: DOWNLOAD, dot: "dot-wait" },
+	{ label: "source", href: REPO, dot: "" },
+	{ label: "docs", href: DOCS, dot: "" },
+];
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<meta name="theme-color" content="#060b07" />
+		<title>{title}</title>
+		<link rel="icon" href={logoDataUri} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+	</head>
+
+	<body class="tube min-h-svh bg-crt-bg font-mono text-sm text-crt-prose antialiased selection:bg-crt selection:text-crt-bg">
+		<div class="mx-auto grid max-w-[104rem] gap-2 p-2 lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[14rem_minmax(0,1fr)_22rem]">
+			<!-- Leading column -->
+			<div class="grid [scrollbar-width:none] content-start gap-2 font-mono text-[0.8125rem] lg:sticky lg:top-2 lg:h-[calc(100svh-1rem)] lg:grid-rows-[auto_auto_minmax(0,1fr)]">
+				<header class="card flex items-center gap-2.5 px-3 py-2.5">
+					<a class="flex items-center gap-2.5" href="/" aria-label="Rune home">
+						<span class="block size-5 [&>svg]:size-full" aria-hidden="true" set:html={logoSvg} />
+						<span class="font-semibold text-crt-bright">rune</span>
+					</a>
+					<a class="ms-auto rounded-md bg-crt px-2.5 py-1 text-xs font-medium text-crt-bg transition hover:bg-crt-bright lg:hidden" href={DOWNLOAD}>download</a>
+					<span class="ms-auto hidden text-xs text-crt-dim lg:inline">{latest.version}</span>
+				</header>
+
+				<section class="card hidden p-3 lg:block" aria-label="Links">
+					<h2 class="card-head">Commands</h2>
+					<ul class="mt-2 grid gap-0.5">
+						{commands.map(command => (
+							<li>
+								<a class="group -mx-1.5 flex items-center gap-2 rounded-md px-1.5 py-1 text-crt transition hover:bg-crt-raised hover:text-crt-bright" href={command.href}>
+									<span class="text-crt-dim group-hover:text-crt-bright" aria-hidden="true">▶</span>
+									{command.label}
+									<span class:list={["dot ms-auto", command.dot]} aria-hidden="true"></span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</section>
+
+				<nav class="card hidden overflow-y-auto p-3 [scrollbar-width:none] lg:block" aria-label="On this page" data-files>
+					<h2 class="card-head">Files</h2>
+					<ul class="mt-2 grid gap-0.5">
+						{entries.map(entry => (
+							<li style={`padding-inline-start: ${(entry.depth ?? 0) * 0.875}rem`}>
+								<a class="-mx-1.5 flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-crt transition hover:text-crt-bright aria-[current]:bg-crt-raised aria-[current]:text-crt-bright" href={entry.href}>
+									<span class="w-2.5 text-crt-dim" aria-hidden="true">{entry.folder ? "▾" : ""}</span>
+									<span class="truncate">{entry.label}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			</div>
+
+			<!-- Hub -->
+			<div class="min-w-0">
+				<nav class="card sticky top-2 z-10 flex items-center gap-1 rounded-b-none p-1.5 font-mono text-[0.8125rem] before:absolute before:inset-x-0 before:-top-[calc(0.5rem+1px)] before:h-2 before:bg-crt-bg" aria-label="Pages">
+					{tabs.map(item => (
+						<a
+							class="flex items-center gap-2 rounded-md px-2.5 py-1 text-crt-dim transition hover:text-crt aria-[current]:bg-crt-raised aria-[current]:text-crt-bright"
+							href={item.href}
+							aria-current={item.id === tab ? "page" : undefined}
+						>
+							<span class="grid size-4 place-items-center rounded border border-crt-line text-[0.5625rem] leading-none text-crt" aria-hidden="true">#</span>
+							{item.label}
+						</a>
+					))}
+				</nav>
+				<main class="card rounded-t-none border-t-0 px-5 pt-10 pb-12 sm:px-10 sm:pt-14">
+					<!-- Text keeps a reading measure. A child opts out with max-w-none!. -->
+					<div class="*:mx-auto *:max-w-[44rem]">
+						<slot />
+
+						<footer class="mt-20 border-t border-crt-line pt-6 text-sm leading-6 text-crt-dim">
+							<p>
+								Powered by <a class="text-crt hover:text-crt-bright" href="https://ghostty.org/">Ghostty</a>.
+								File icons from the <a class="text-crt hover:text-crt-bright" href="https://github.com/TheRedXD/zed-icons-colored-theme">Colored Zed Icons Theme</a>.
+								Diagrams drawn by <a class="text-crt hover:text-crt-bright" href="https://github.com/lukilabs/beautiful-mermaid-swift">BeautifulMermaid</a>.
+							</p>
+							<p class="mt-1">
+								Released under the <a class="text-crt hover:text-crt-bright" href={`${REPO}/blob/main/LICENSE`}>MIT License</a>.
+								<a class="text-crt hover:text-crt-bright" href={`${REPO}/issues`}>Report an issue &#8599;</a>
+							</p>
+						</footer>
+					</div>
+				</main>
+			</div>
+
+			<!-- Trailing column -->
+			<div class="grid min-w-0 content-start gap-2 lg:col-start-2 xl:sticky xl:top-2 xl:col-start-3 xl:h-[calc(100svh-1rem)] xl:grid-rows-[auto_minmax(0,1fr)]">
+				<div class="card p-3">
+					<Arcade />
+				</div>
+
+				<section class="card overflow-y-auto p-3 font-mono text-[0.8125rem] [scrollbar-width:none]" aria-label="Release history">
+					<h2 class="card-head"><span>History</span><a class="tracking-normal normal-case text-crt hover:text-crt-bright" href="/changelog">all {releases.length}</a></h2>
+					<ol class="mt-2">
+						{releases.map((release, index) => (
+							<li>
+								<a class="group flex items-center gap-2 py-0.5" href={`/changelog#${release.version}`}>
+									<span class="relative grid w-2 shrink-0 place-items-center self-stretch" aria-hidden="true">
+										<span class="absolute inset-y-0 w-px bg-crt-dim/60"></span>
+										<span class:list={["relative size-1.5 rounded-full", index === 0 ? "bg-crt-bright" : "bg-crt-dim"]}></span>
+									</span>
+									<span class="shrink-0 rounded bg-crt/15 px-1 text-[0.6875rem] text-crt-bright">{release.version}</span>
+									<span class="truncate text-crt group-hover:text-crt-bright">{release.summary}</span>
+								</a>
+							</li>
+						))}
+					</ol>
+				</section>
+			</div>
+		</div>
+
+		<script>
+			// Mark the section being read in the Files card, the way Rune marks the open file.
+			const links = [...document.querySelectorAll<HTMLAnchorElement>("[data-files] a[href*='#']")];
+			const byId = new Map(links.map(link => [decodeURIComponent(new URL(link.href).hash.slice(1)), link]));
+			const sections = [...byId.keys()].map(id => document.getElementById(id)).filter(section => section !== null);
+			const observer = new IntersectionObserver(entries => {
+				for (const entry of entries) {
+					if (!entry.isIntersecting) continue;
+					for (const link of links) link.removeAttribute("aria-current");
+					byId.get(entry.target.id)?.setAttribute("aria-current", "location");
+				}
+			}, { rootMargin: "-15% 0px -75% 0px" });
+			for (const section of sections) observer.observe(section);
+		</script>
+	</body>
+</html>

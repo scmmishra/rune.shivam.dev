@@ -1,16 +1,16 @@
 <section class="arcade" aria-label="Rune patrol arcade game">
-  <div class="arcade-hud glow">
+  <div class="arcade-hud">
     <span>SECTOR <span class="bright" data-sector>01</span> · <span data-wave>WAVE 1/3</span></span>
     <span>SCORE <span class="bright" data-score>00000</span></span>
     <span data-hearts aria-label="5 hearts remaining">♥ ♥ ♥ ♥ ♥</span>
   </div>
   <div class="arcade-field">
     <canvas width="500" height="520" tabindex="0" aria-label="Rune patrol. Move the cursor to fly. Firing is automatic. Double-click to call collected reinforcements. Escape pauses. S toggles sound." aria-describedby="arcade-controls"></canvas>
-    <p class="arcade-wave glow" data-wave-banner hidden></p>
+    <p class="arcade-wave" data-wave-banner hidden></p>
     <p class="arcade-boss" data-boss hidden></p>
     <div class="arcade-menu">
       <p class="arcade-kicker">RUNE / FLIGHT SIMULATOR</p>
-      <h2 class="glow-hi" data-title>patrol_01</h2>
+      <h2 class="glow" data-title>patrol_01</h2>
       <p class="arcade-message" data-message>Three formations inbound. Stay airborne.</p>
       <button type="button" data-start disabled>[ launch ]</button>
       <p class="arcade-record" data-record></p>
@@ -47,7 +47,7 @@
 </script>
 
 <style>
-  .arcade { margin: 1rem 1.25rem 3rem; color: var(--color-crt); font-size: .6875rem; letter-spacing: .06em; }
+  .arcade { margin-inline: auto; font-family: var(--font-mono); color: var(--color-crt); font-size: .6875rem; letter-spacing: .06em; }
   .arcade-hud, .arcade-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1rem; }
   .arcade-hud { padding-block: 1rem; border-bottom: 1px solid rgb(77 224 122 / .16); }
   .bright { color: var(--color-crt-bright); }
@@ -75,12 +75,6 @@
   .arcade-dev label { display: flex; align-items: center; gap: .375rem; }
   .arcade-dev input { accent-color: var(--color-crt); }
   .arcade-dev select { color: var(--color-crt-bright); background: var(--color-crt-bg); border: 1px solid var(--color-crt-dim); padding: .2rem; }
-  /* Stacked: the canvas keeps its own aspect ratio, and the width cap keeps the whole field inside a short viewport. */
+  /* The canvas keeps its own aspect ratio, and the width cap keeps the whole field inside a short viewport. */
   .arcade { max-width: max(16rem, min(85svh, 36rem) * 500 / 520); }
-  @media (min-width: 40rem) { .arcade { margin-inline: 2.5rem; } }
-  /* Side by side. Keep in sync with the split variant in global.css. */
-  @media (min-width: 64rem) and (min-height: 30rem) {
-    .arcade { position: fixed; inset-block: 2rem; left: calc(50% + 1.5rem); width: calc(min(50%, 50rem) - 4rem); max-width: none; margin: 0; display: flex; flex-direction: column; }
-    canvas { height: 100%; }
-  }
 </style>
